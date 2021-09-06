@@ -3,6 +3,7 @@
 #include <string.h> // Para usar strings
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
 #ifdef WIN32
 #include <windows.h> // includes only in MSWindows not in UNIX
@@ -46,7 +47,7 @@ void init();
 void draw();
 void keyboard(unsigned char key, int x, int y);
 
-int color_distance(int a, int b);
+float color_distance(int a, int b);
 int swap_pixels(int a, int b);
 int move_pixel(int i);
 
@@ -154,26 +155,26 @@ int main(int argc, char *argv[])
     }
     // int troquei = 1;
     // while( troquei == 1 ) {
-    for(int k = 0; k < 100; k++) {
+    for(int k = 0; k < 500; k++) {
         for(int i = 0; i< tam; i++){
             //move_pixel(i);
             int a_idx = rand() % tam;
             int b_idx = rand() % tam;
 
-            int current_score = abs(color_distance(a_idx, a_idx) - color_distance(b_idx, b_idx));
-            int new_score = abs(color_distance(a_idx, b_idx) - color_distance(b_idx, a_idx));
+            float current_score = abs(color_distance(a_idx, a_idx) - color_distance(b_idx, b_idx));
+            float new_score = abs(color_distance(a_idx, b_idx) - color_distance(b_idx, a_idx));
 
             if(new_score < current_score) {
                 swap_pixels(a_idx, b_idx);
             }
         }
 
-        //if(k % 100 == 0) {
+        if(k % 100 == 0) {
             char fileName[50];
-            snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
+            snprintf(fileName, sizeof(fileName), "../out/out_%d.bmp", k);
 
             SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
-        //}
+        }
     }    
     
 
@@ -188,16 +189,59 @@ int main(int argc, char *argv[])
     glutMainLoop();
 }
 
-int color_distance(int pixel_saida, int pixel_desej) {
-    RGB a = pic[SAIDA].img[pixel_saida];
-    RGB b = pic[DESEJ].img[pixel_desej];
+float color_distance(int pixel_saida, int pixel_desej) {
+    RGB c1 = pic[SAIDA].img[pixel_saida];
+    RGB c2 = pic[DESEJ].img[pixel_desej];
 
-    int media = 0;
-    media += a.r - b.r;
-    media += a.g - b.g;
-    media += a.b - b.b;
+    // int media = 0, pr = 1, pg = 1, pb = 1;
+    // if ( b.r > b.g && b.r > b.b ){
+    //     pr = 3;
+    //     if( b.g > b.b ){
+    //         pg = 2;
+    //     }
+    //     else pb = 2;
+    // } else if ( b.g > b.r && b.g > b.b ){
+    //     pg = 3;
+    //     if( b.r > b.b ){
+    //         pr = 2;
+    //     } else {
+    //         pb = 2;
+    //     }
+    // } else if ( b.b > b.r && b.b > b.g ){
+    //     pr = 3;
+    //     if( b.r > b.g ){
+    //         pr = 2;
+    //     }
+    //     else pg = 2;
 
-    return abs(media);
+    // }
+
+    // media += a.r - b.r * pr;
+    // media += a.g - b.g * pg;
+    // media += a.b - b.b * pb;
+
+//    long rmean = ( (long)x.r + (long)y.r ) / 2;
+//    long r = (long)x.r - (long)y.r;
+//    long g = (long)x.g - (long)y.g;
+//    long b = (long)x.b - (long)y.b;
+//    return sqrt((((512+rmean)*r*r)>>8) + 4*g*g + (((767-rmean)*b*b)>>8));
+
+int diffRed   = abs(c1.r   - c2.r);
+int diffGreen = abs(c1.g - c2.g);
+int diffBlue  = abs(c1.b  - c2.b);
+
+float pctDiffRed   = (float)diffRed   / 255;
+float pctDiffGreen = (float)diffGreen / 255;
+float pctDiffBlue   = (float)diffBlue  / 255;
+
+return (pctDiffRed + pctDiffGreen + pctDiffBlue) / 3 * 100;
+    // int media = 0;
+
+    // media += (a.r - b.r) * (a.r - b.r);
+    // media += (a.g - b.g) * (a.g - b.g);
+    // media += (a.b - b.b) * (a.b - b.b);
+
+    // return media;
 }
 
 int swap_pixels(int i, int k) {
