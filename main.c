@@ -3,6 +3,7 @@
 #include <string.h> // Para usar strings
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
 #ifdef WIN32
 #include <windows.h> // includes only in MSWindows not in UNIX
@@ -24,11 +25,6 @@ typedef struct
     unsigned char r, g, b;
 } RGB;
 
-typedef struct
-{
-    unsigned char h, s, v;
-} HSV;
-
 // Uma imagem RGB
 typedef struct
 {
@@ -48,7 +44,6 @@ void keyboard(unsigned char key, int x, int y);
 
 int color_distance(int a, int b);
 int swap_pixels(int a, int b);
-int move_pixel(int i);
 
 // Largura e altura da janela
 int width, height;
@@ -137,15 +132,6 @@ int main(int argc, char *argv[])
     // Neste ponto, voce deve implementar o algoritmo!
     // (ou chamar funcoes para fazer isso)
     //
-    // Aplica o algoritmo e gera a saida em pic[SAIDA].img...
-    // ...
-    // ...
-    //
-    // Exemplo de manipulação: inverte as cores na imagem de saída
-    // pic[SAIDA].img[i].r = 255 - pic[ORIGEM].img[i].r;
-    // pic[SAIDA].img[i].g = 255 -  pic[ORIGEM].img[i].g;
-    // pic[SAIDA].img[i].b = 255 -  pic[ORIGEM].img[i].b;
-
    // origem = fonte das cores  || desejada => a que vai ser a base || saida => nova img
     for(int i = 0; i< tam; i++ ){
         pic[SAIDA].img[i].r = pic[ORIGEM].img[i].r;
@@ -154,27 +140,29 @@ int main(int argc, char *argv[])
     }
     // int troquei = 1;
     // while( troquei == 1 ) {
-    for(int k = 0; k < 100; k++) {
-        for(int i = 0; i< tam; i++){
-            //move_pixel(i);
-            int a_idx = rand() % tam;
-            int b_idx = rand() % tam;
+        for(int k = 0; k < 1000; k++) {
+            for(int i = 0; i< tam; i++){
+                int a_idx = rand() % tam;
+                int b_idx = rand() % tam;
 
-            int current_score = abs(color_distance(a_idx, a_idx) - color_distance(b_idx, b_idx));
-            int new_score = abs(color_distance(a_idx, b_idx) - color_distance(b_idx, a_idx));
+                int current_score_a = color_distance(a_idx, a_idx);
+                int new_score_a = color_distance(b_idx, a_idx);
 
-            if(new_score < current_score) {
-                swap_pixels(a_idx, b_idx);
+                int current_score_b = color_distance(b_idx, b_idx);
+                int new_score_b = color_distance(a_idx, b_idx);
+
+                if(new_score_a < current_score_a && new_score_b < current_score_b ) {
+                    swap_pixels(a_idx, b_idx);
+                }
             }
-        }
 
-        //if(k % 100 == 0) {
-            char fileName[50];
-            snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
+            if(k % 100 == 0) {
+                char fileName[50];
+                snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
 
-            SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
-        //}
-    }    
+                SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
+            }
+        }    
     
 
     // NÃO ALTERAR A PARTIR DAQUI!
@@ -193,11 +181,11 @@ int color_distance(int pixel_saida, int pixel_desej) {
     RGB b = pic[DESEJ].img[pixel_desej];
 
     int media = 0;
-    media += a.r - b.r;
-    media += a.g - b.g;
-    media += a.b - b.b;
+    media += (a.r-b.r) * (a.r-b.r);
+    media += (a.g-b.g) * (a.g-b.g);
+    media += (a.b-b.b) * (a.b-b.b);
 
-    return abs(media);
+    return sqrt(media);
 }
 
 int swap_pixels(int i, int k) {
@@ -206,58 +194,6 @@ int swap_pixels(int i, int k) {
     pic[SAIDA].img[k] = aux;
 }
 
-typedef struct {
-    int x;
-    int y;
-} Point;
-
-int move_pixel(int i) {
-    Point offsets[] = {
-        (Point) {.x = -1, .y = -1 },
-        (Point) {.x = -1, .y = 0 },
-        (Point) {.x = -1, .y = 1},
-        (Point) {.x = 0, .y = -1 },
-        (Point) {.x = 0, .y = 0 },
-        (Point) {.x = 0, .y = 1},
-        (Point) {.x = 1, .y = -1 },
-        (Point) {.x = 1, .y = 0 },
-        (Point) {.x = 1, .y = 1},
-    };
-
-    Point curr_pos;
-    curr_pos.x = i % width;
-    curr_pos.y = i / width;
-
-    int best_neighbor_score = -1;
-    int best_neighbor_idx = -1;
-
-    for(int k = 0; k < 8; k++) {
-        int mult = rand() % width;
-        Point offset = offsets[k];
-        
-        Point neighbor_pos;
-        neighbor_pos.x = curr_pos.x + offset.x * mult;
-        neighbor_pos.y = curr_pos.y + offset.y * mult;
-
-        int neighbor_idx = neighbor_pos.y * width + neighbor_pos.x;
-
-        if(neighbor_idx > width * height || neighbor_idx < 0) {
-            continue;
-        }
-
-        int current_score = abs(color_distance(i, i) - color_distance(neighbor_idx, neighbor_idx));
-        int new_score = abs(color_distance(i, neighbor_idx) - color_distance(neighbor_idx, i));
-
-        if(new_score < current_score && (new_score < best_neighbor_score || best_neighbor_idx == -1)) {
-            best_neighbor_score = new_score;
-            best_neighbor_idx = neighbor_idx;
-        }
-    }
-
-    if(best_neighbor_idx != -1){
-        swap_pixels(i, best_neighbor_idx);
-    }
-}
 
 // Carrega uma imagem para a struct Img
 void load(char *name, Img *pic)
