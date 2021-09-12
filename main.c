@@ -42,7 +42,7 @@ void init();
 void draw();
 void keyboard(unsigned char key, int x, int y);
 
-int color_distance(int a, int b);
+float color_distance(int a, int b);
 int swap_pixels(int a, int b);
 
 // Largura e altura da janela
