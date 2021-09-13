@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
         pic[SAIDA].img[i].b = pic[ORIGEM].img[i].b;
     }
 
-    for(int k = 0; k < 500; k++) {
+    for(int k = 0; k < 200; k++) {
 
         for(int i = 0; i < tam; i++){
             int a_idx = rand() % tam;
@@ -155,10 +155,6 @@ int main(int argc, char *argv[])
             }
 
         }
-
-    }
-
-    for(int k = 0; k < 500; k++) {
 
         for(int i = 0; i < tam; i++){
             int a_idx = rand() % tam;
@@ -182,6 +178,7 @@ int main(int argc, char *argv[])
 
             SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
         }
+
     }
     
 
