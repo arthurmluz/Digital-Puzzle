@@ -43,6 +43,8 @@ void draw();
 void keyboard(unsigned char key, int x, int y);
 
 float color_distance(int a, int b);
+float color_distance2(int pixel_saida, int pixel_desej);
+
 int swap_pixels(int a, int b);
 
 // Largura e altura da janela
@@ -138,31 +140,49 @@ int main(int argc, char *argv[])
         pic[SAIDA].img[i].g = pic[ORIGEM].img[i].g;
         pic[SAIDA].img[i].b = pic[ORIGEM].img[i].b;
     }
-    // int troquei = 1;
-    // while( troquei == 1 ) {
-        for(int k = 0; k < 1000; k++) {
-            for(int i = 0; i< tam; i++){
-                int a_idx = rand() % tam;
-                int b_idx = rand() % tam;
 
-                int current_score_a = color_distance(a_idx, a_idx);
-                int new_score_a = color_distance(b_idx, a_idx);
+    for(int k = 0; k < 500; k++) {
 
-                int current_score_b = color_distance(b_idx, b_idx);
-                int new_score_b = color_distance(a_idx, b_idx);
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            int current_score = abs(color_distance2(a_idx, a_idx) - color_distance2(b_idx, b_idx));
+            int new_score = abs(color_distance2(a_idx, b_idx) - color_distance2(b_idx, a_idx));
 
-                if(new_score_a < current_score_a && new_score_b < current_score_b ) {
-                    swap_pixels(a_idx, b_idx);
-                }
+            if(new_score < current_score ) {
+                swap_pixels(a_idx, b_idx);
             }
 
-            if(k % 100 == 0) {
-                char fileName[50];
-                snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
+        }
 
-                SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
+    }
+
+    for(int k = 0; k < 500; k++) {
+
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            int current_score_a = color_distance(a_idx, a_idx);
+            int new_score_a = color_distance(b_idx, a_idx);
+
+            int current_score_b = color_distance(b_idx, b_idx);
+            int new_score_b = color_distance(a_idx, b_idx);
+
+            if(new_score_a < current_score_a && new_score_b < current_score_b ) {
+                swap_pixels(a_idx, b_idx);
             }
-        }    
+
+        }
+
+        if(k % 100 == 0) {
+            char fileName[50];
+            snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
+
+            SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
+        }
+    }
     
 
     // NÃO ALTERAR A PARTIR DAQUI!
@@ -176,16 +196,30 @@ int main(int argc, char *argv[])
     glutMainLoop();
 }
 
-int color_distance(int pixel_saida, int pixel_desej) {
-    RGB a = pic[SAIDA].img[pixel_saida];
-    RGB b = pic[DESEJ].img[pixel_desej];
+float color_distance(int pixel_saida, int pixel_desej) {
+    RGB a = pic[DESEJ].img[pixel_saida];
+    RGB b = pic[SAIDA].img[pixel_desej];
 
-    int media = 0;
+    float media = 0;
+    
     media += (a.r-b.r) * (a.r-b.r);
     media += (a.g-b.g) * (a.g-b.g);
     media += (a.b-b.b) * (a.b-b.b);
 
-    return sqrt(media);
+   return sqrt(media);
+
+}
+float color_distance2(int pixel_saida, int pixel_desej){
+    RGB a = pic[SAIDA].img[pixel_saida];
+    RGB b = pic[DESEJ].img[pixel_desej];
+
+    float media = 0;
+    
+    media += (a.r-b.r);
+    media += (a.g-b.g);
+    media += (a.b-b.b);
+
+    return media;
 }
 
 int swap_pixels(int i, int k) {
