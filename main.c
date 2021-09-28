@@ -42,9 +42,12 @@ void init();
 void draw();
 void keyboard(unsigned char key, int x, int y);
 
+//Funções do grupo
 float color_distance(int a, int b);
 float color_distance2(int pixel_saida, int pixel_desej);
-
+void funcao1(int tam, int k);
+void funcao2(int tam, int k);
+//-----------------
 int swap_pixels(int a, int b);
 
 // Largura e altura da janela
@@ -72,6 +75,14 @@ int main(int argc, char *argv[])
         printf("Origem é a fonte das cores, destino é a imagem desejada\n");
         exit(1);
     }
+
+    //Flag pra descobrir se quer função de imagens 1 ou imagens 2
+    int flag = 1;
+    if( argc == 3 ){
+        flag = 0;
+        argv[3] = NULL;
+    }
+
     glutInit(&argc, argv);
 
     // Define do modo de operacao da GLUT
@@ -141,46 +152,13 @@ int main(int argc, char *argv[])
         pic[SAIDA].img[i].b = pic[ORIGEM].img[i].b;
     }
 
-    for(int k = 0; k < 200; k++) {
-
-        for(int i = 0; i < tam; i++){
-            int a_idx = rand() % tam;
-            int b_idx = rand() % tam;
-            
-            int current_score = abs(color_distance2(a_idx, a_idx) - color_distance2(b_idx, b_idx));
-            int new_score = abs(color_distance2(a_idx, b_idx) - color_distance2(b_idx, a_idx));
-
-            if(new_score < current_score ) {
-                swap_pixels(a_idx, b_idx);
-            }
-
-        }
-
-        for(int i = 0; i < tam; i++){
-            int a_idx = rand() % tam;
-            int b_idx = rand() % tam;
-            
-            int current_score_a = color_distance(a_idx, a_idx);
-            int new_score_a = color_distance(b_idx, a_idx);
-
-            int current_score_b = color_distance(b_idx, b_idx);
-            int new_score_b = color_distance(a_idx, b_idx);
-
-            if(new_score_a < current_score_a && new_score_b < current_score_b ) {
-                swap_pixels(a_idx, b_idx);
-            }
-
-        }
-
-        if(k % 100 == 0) {
-            char fileName[50];
-            snprintf(fileName, sizeof(fileName), "out/out_%d.bmp", k);
-
-            SOIL_save_image(fileName, SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
-        }
-
-    }
-    
+// mudar o tamanho do 2° parametro (200), aumenta o refinamento da imagem
+// essa flag é alterada ao passar mais um parâmetro (qualquer coisa) ao iniciar o programa ex: ./transition dali2.jpg dali1.jpg batata
+// nós fizemos 2 funções para obter 2 imagens diferentes, cada um do grupo gostou mais de uma, então fizemos as duas.
+    if(flag)
+        funcao1(tam, 200);
+    else
+        funcao2(tam, 200);
 
     // NÃO ALTERAR A PARTIR DAQUI!
 
@@ -191,6 +169,72 @@ int main(int argc, char *argv[])
 
     // Entra no loop de eventos, não retorna
     glutMainLoop();
+}
+
+void funcao1(int tam, int refinamentos){
+    for(int k = 0; k < refinamentos; k++) {
+
+//      ajustes na "luminosidade"
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            float current_score = abs(color_distance2(a_idx, a_idx) - color_distance2(b_idx, b_idx));
+            float new_score = abs(color_distance2(a_idx, b_idx) - color_distance2(b_idx, a_idx));
+
+            if(new_score < current_score )
+                swap_pixels(a_idx, b_idx);
+        }
+    }
+
+    for(int k = 0; k < refinamentos; k++){
+//      ajustes nas cores
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            float current_score_a = color_distance(a_idx, a_idx);
+            float new_score_a = color_distance(b_idx, a_idx);
+
+            float current_score_b = color_distance(b_idx, b_idx);
+            float new_score_b = color_distance(a_idx, b_idx);
+
+            if(new_score_a < current_score_a && new_score_b < current_score_b )
+                swap_pixels(a_idx, b_idx);
+        }
+    }
+}
+
+void funcao2(int tam, int refinamentos){
+    for(int k = 0; k < refinamentos; k++) {
+
+//      ajustes na "luminosidade"
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            float current_score = abs(color_distance2(a_idx, a_idx) - color_distance2(b_idx, b_idx));
+            float new_score = abs(color_distance2(a_idx, b_idx) - color_distance2(b_idx, a_idx));
+
+            if(new_score < current_score )
+                swap_pixels(a_idx, b_idx);
+        }
+
+//      ajustes nas cores
+        for(int i = 0; i < tam; i++){
+            int a_idx = rand() % tam;
+            int b_idx = rand() % tam;
+            
+            float current_score_a = color_distance(a_idx, a_idx);
+            float new_score_a = color_distance(b_idx, a_idx);
+
+            float current_score_b = color_distance(b_idx, b_idx);
+            float new_score_b = color_distance(a_idx, b_idx);
+
+            if(new_score_a < current_score_a && new_score_b < current_score_b )
+                swap_pixels(a_idx, b_idx);
+        }
+    }
 }
 
 float color_distance(int pixel_saida, int pixel_desej) {
