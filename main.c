@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     // Cria textura para a imagem de saída
     tex[SAIDA] = SOIL_create_OGL_texture((unsigned char *)pic[SAIDA].img, pic[SAIDA].width, pic[SAIDA].height, SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
     // Grava imagem de saída em out.bmp, para conferência
-    SOIL_save_image("out/out.bmp", SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
+    SOIL_save_image("out.bmp", SOIL_SAVE_TYPE_BMP, pic[SAIDA].width, pic[SAIDA].height, 3, (const unsigned char *)pic[SAIDA].img);
 
     // Entra no loop de eventos, não retorna
     glutMainLoop();
