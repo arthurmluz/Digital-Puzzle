@@ -2,7 +2,7 @@
 
 Grupo: Arthur Musskopf da Luz e Lucas Antunes
 
-![Imagem com o simulador do sistema](imgs/simulide)
+![Imagem com o simulador do sistema](simulide.png)
 
 github: https://github.com/arthurmluz/Digital-Puzzle
 
